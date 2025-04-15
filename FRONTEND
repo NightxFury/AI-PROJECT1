@@ -1,0 +1,83 @@
+import React, { useState } from "react";
+
+const routines = {
+  Beginner: ["Jumping Jacks", "Push-ups", "Bodyweight Squats"],
+  Intermediate: ["Burpees", "Plank (1 min)", "Lunges"],
+  Advanced: ["Pull-ups", "Deadlifts", "Bench Press"],
+};
+
+function App() {
+  const [level, setLevel] = useState("Beginner");
+  const [completed, setCompleted] = useState([]);
+
+  const toggleComplete = (exercise) => {
+    setCompleted((prev) =>
+      prev.includes(exercise)
+        ? prev.filter((e) => e !== exercise)
+        : [...prev, exercise]
+    );
+  };
+
+  const saveProgress = () => {
+    fetch("http://localhost:5000/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: "john", level, completed }),
+    })
+      .then((res) => res.json())
+      .then((data) => alert("Progress Saved"));
+  };
+
+  return (
+    <div className="p-4 font-sans max-w-xl mx-auto">
+      <h1 className="text-3xl font-bold text-center mb-6">🏋️ FitBuddy</h1>
+
+      <div className="mb-4">
+        <label className="mr-2 font-medium">Choose Level:</label>
+        <select
+          value={level}
+          onChange={(e) => setLevel(e.target.value)}
+          className="border px-2 py-1 rounded"
+        >
+          {Object.keys(routines).map((lvl) => (
+            <option key={lvl} value={lvl}>
+              {lvl}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <ul className="mb-4">
+        {routines[level].map((exercise) => (
+          <li
+            key={exercise}
+            className={`p-2 rounded cursor-pointer mb-2 ${
+              completed.includes(exercise)
+                ? "bg-green-300 line-through"
+                : "bg-gray-100"
+            }`}
+            onClick={() => toggleComplete(exercise)}
+          >
+            {exercise}
+          </li>
+        ))}
+      </ul>
+
+      <button
+        onClick={saveProgress}
+        className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+      >
+        Save Progress
+      </button>
+
+      <button
+        onClick={() => setCompleted([])}
+        className="bg-gray-300 px-4 py-2 rounded"
+      >
+        Reset
+      </button>
+    </div>
+  );
+}
+
+export default App;
